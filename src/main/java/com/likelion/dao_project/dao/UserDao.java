@@ -25,14 +25,14 @@ public class UserDao {
         this.jdbcContext = new JdbcContext(dataSource);
     }
 
-    public void jdbcContextWithStatementStrategy(StatementStrategy statementStrategy) throws SQLException {
+    public void jdbcContextWithStatementStrategy(StatementStrategy stmt) throws SQLException {
         PreparedStatement ps = null;
         Connection c = null;
         try {
             c = dataSource.getConnection();
 
-            DeleteAllStatement deleteAllStatement = new DeleteAllStatement();
-            ps = deleteAllStatement.makePreparedStrategy(c);
+
+            ps = stmt.makePreparedStrategy(c);
             ps.executeUpdate();
 
         } catch (SQLException e) {
