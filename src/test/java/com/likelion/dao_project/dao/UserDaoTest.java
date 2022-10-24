@@ -30,7 +30,7 @@ class UserDaoTest {
 
     @BeforeEach
     void setUp(){
-        this.userDao = context.getBean("awsConnectionMaker", UserDao.class);
+        this.userDao = context.getBean("localConnectionMaker", UserDao.class);
 
         // 픽스처: 여러 테스트에서 반복적으로 사용되는 부분 -> BeforeEach 를 이용해서 생성해두면 편리함
         this.user1 = new User("121", "박성철", "61321");

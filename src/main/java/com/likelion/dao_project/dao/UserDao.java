@@ -6,6 +6,7 @@ import com.likelion.dao_project.domain.User;
 import com.likelion.dao_project.statement_strategy.AddStatement;
 import com.likelion.dao_project.statement_strategy.DeleteAllStatement;
 import com.likelion.dao_project.statement_strategy.StatementStrategy;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 
 import javax.sql.DataSource;
@@ -15,10 +16,13 @@ import java.util.Map;
 
 public class UserDao {
 
-    private DataSource dataSource;
+    private final DataSource dataSource;
+    private final JdbcContext jdbcContext;
 
     public UserDao(DataSource dataSource) {
+
         this.dataSource = dataSource;
+        this.jdbcContext = new JdbcContext(dataSource);
     }
 
     public void jdbcContextWithStatementStrategy(StatementStrategy statementStrategy) throws SQLException {
@@ -56,9 +60,18 @@ public class UserDao {
 
     }
 
-    public void add(User user) throws SQLException {
-        StatementStrategy st = new AddStatement(user);
-        jdbcContextWithStatementStrategy(st);
+    public void add(User user) throws SQLException, ClassNotFoundException {
+
+        jdbcContextWithStatementStrategy(new StatementStrategy() {
+            @Override
+            public PreparedStatement makePreparedStrategy(Connection c) throws SQLException {
+                PreparedStatement pstmt = c.prepareStatement("INSERT INTO users(id, name, password) VALUES(?,?,?);");
+                pstmt.setString(1, user.getId());
+                pstmt.setString(2, user.getName());
+                pstmt.setString(3, user.getPassword());
+                return pstmt;
+            }
+        });
     }
 
     public User findById(String id) {
@@ -74,9 +87,11 @@ public class UserDao {
 
             // Query문 실행
             ResultSet rs = pstmt.executeQuery();
-            rs.next();
-            User user = new User(rs.getString("id"), rs.getString("name"),
-                    rs.getString("password"));
+            User user = null;
+            if (rs.next()) {
+                user = new User(rs.getString(1), rs.getString(2), rs.getString(3));
+            }
+
 
             rs.close();
             pstmt.close();
@@ -89,9 +104,16 @@ public class UserDao {
         }
     }
 
+
+
     public void deleteAll() throws SQLException {
-        StatementStrategy st = new DeleteAllStatement();
-        jdbcContextWithStatementStrategy(st);
+        jdbcContextWithStatementStrategy(new StatementStrategy() {
+            @Override
+            public PreparedStatement makePreparedStrategy(Connection c) throws SQLException {
+                return c.prepareStatement("delete from users");
+            }
+        });
+
     }
 
     public static void main(String[] args) {

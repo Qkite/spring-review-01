@@ -20,11 +20,19 @@ public class UserDaoFactory {
     }
 
     @Bean
+    public UserDao localConnectionMaker(){
+        AWSConnectionMaker awsConnectionMaker = new AWSConnectionMaker();
+        UserDao userDao = new UserDao(localDataSource());
+        return userDao;
+    }
+
+
+    @Bean
     DataSource awsDataSource(){
         Map<String, String> env = System.getenv();
         SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
         dataSource.setDriverClass(com.mysql.cj.jdbc.Driver.class);
-        dataSource.setUrl("DB_HOST");
+        dataSource.setUrl(env.get("DB_HOST"));
         dataSource.setUsername(env.get("DB_USER"));
         dataSource.setPassword(env.get("DB_PASSWORD"));
         return dataSource;
@@ -36,7 +44,7 @@ public class UserDaoFactory {
         Map<String, String> env = System.getenv();
         SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
         dataSource.setDriverClass(com.mysql.cj.jdbc.Driver.class);
-        dataSource.setUrl("DB_HOST");
+        dataSource.setUrl(env.get("DB_HOST"));
         dataSource.setUsername(env.get("DB_USER"));
         dataSource.setPassword(env.get("DB_PASSWORD"));
         return dataSource;
