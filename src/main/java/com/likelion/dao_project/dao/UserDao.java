@@ -133,8 +133,10 @@ public class UserDao {
             c = dataSource.getConnection();
             ps = c.prepareStatement("select count(*) from users");
             rs = ps.executeQuery();
-            rs.next();
-            count = rs.getInt(1);
+
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
