@@ -3,6 +3,7 @@ package com.likelion.dao_project.dao;
 import com.likelion.dao_project.domain.User;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.sql.SQLException;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -86,6 +88,21 @@ class UserDaoTest {
         assertThrows(EmptyResultDataAccessException.class, () -> {
             userDao.findById("1554");
         }); // EmptyResultDataAccessException이 발생하게 설정을 해주지 않았기 때문에 에러가 났었음
+
+    }
+
+    @Test
+    @DisplayName("데이터가 있을 때 개수 리턴하는지?")
+    void getAllTest() throws SQLException, ClassNotFoundException {
+        userDao.deleteAll();
+        List<User> users = userDao.getAll();
+        assertEquals(0, users.size());
+        userDao.add(user1);
+        userDao.add(user2);
+        userDao.add(user3);
+        users = userDao.getAll();
+        assertEquals(users.size(), 3);
+
 
     }
 

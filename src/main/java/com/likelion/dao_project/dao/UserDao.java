@@ -13,6 +13,7 @@ import org.springframework.jdbc.core.RowMapper;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.util.List;
 import java.util.Map;
 
 
@@ -21,12 +22,20 @@ public class UserDao {
     private DataSource dataSource;
     private JdbcContext jdbcContext;
     private JdbcTemplate jdbcTemplate;
+    private RowMapper<User> rowMapper;
 
     public UserDao(DataSource dataSource) {
 
         //this.dataSource = dataSource;
         //this.jdbcContext = new JdbcContext(dataSource);
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.rowMapper = new RowMapper<User>() {
+            @Override
+            public User mapRow(ResultSet rs, int rowNum) throws SQLException {
+                User user = new User(rs.getString("id"), rs.getString("name"), rs.getString("password"));
+                return user;
+            }
+        };
     }
 
     public void jdbcContextWithStatementStrategy(StatementStrategy stmt) throws SQLException {
@@ -79,13 +88,13 @@ public class UserDao {
     public User findById(String id) throws SQLException, ClassNotFoundException {
 
         String sql = "SELECT * from users where id = ?";
-        RowMapper<User> rowMapper = new RowMapper<User>() {
-            @Override
-            public User mapRow(ResultSet rs, int rowNum) throws SQLException {
-                User user = new User(rs.getString("id"), rs.getString("name"), rs.getString("password"));
-                return user;
-            }
-        };
+//        RowMapper<User> rowMapper = new RowMapper<User>() {
+//            @Override
+//            public User mapRow(ResultSet rs, int rowNum) throws SQLException {
+//                User user = new User(rs.getString("id"), rs.getString("name"), rs.getString("password"));
+//                return user;
+//            }
+//        };
 
         return this.jdbcTemplate.queryForObject(sql, rowMapper, id);
 
@@ -164,4 +173,17 @@ public class UserDao {
         return count;
     }
 
+    public List<User> getAll(){
+        String sql = "select * from users order by id";
+//        RowMapper<User> rowMapper = new RowMapper<User>() {
+//            @Override
+//            public User mapRow(ResultSet rs, int rowNum) throws SQLException {
+//                User user = new User(rs.getString("id"), rs.getString("name"), rs.getString("password"));
+//                return user;
+//            }
+        return this.jdbcTemplate.query(sql, rowMapper);
+        };
+
 }
+
+
