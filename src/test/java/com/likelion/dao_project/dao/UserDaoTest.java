@@ -80,7 +80,13 @@ class UserDaoTest {
     }
 
 
+    @Test
+    void findById(){
 
+        assertThrows(EmptyResultDataAccessException.class, () -> {
+            userDao.findById("1554");
+        }); // EmptyResultDataAccessException이 발생하게 설정을 해주지 않았기 때문에 에러가 났었음
 
+    }
 
 }

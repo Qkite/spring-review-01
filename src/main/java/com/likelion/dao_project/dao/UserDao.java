@@ -54,9 +54,7 @@ public class UserDao {
                 }
             }
 
-
         }
-
 
     }
 
@@ -74,54 +72,33 @@ public class UserDao {
         });
     }
 
-    public User findById(String id) {
-        Map<String, String> env = System.getenv();
-        Connection c;
-        try {
-            // DB접속 (ex sql workbeanch실행)
-            c = dataSource.getConnection();
+    public User findById(String id) throws SQLException, ClassNotFoundException {
+        Connection conn = dataSource.getConnection();
+        PreparedStatement ps = conn.prepareStatement("SELECT * from users where id = ?");
+        ps.setString(1, id);
+        ResultSet rs = ps.executeQuery();
 
-            // Query문 작성
-            PreparedStatement pstmt = c.prepareStatement("SELECT * FROM users WHERE id = ?");
-            pstmt.setString(1, id);
-
-            // Query문 실행
-            ResultSet rs = pstmt.executeQuery();
-            User user = null;
-            if (rs.next()) {
-                user = new User(rs.getString(1), rs.getString(2), rs.getString(3));
-            }
-
-
-            rs.close();
-            pstmt.close();
-            c.close();
-
-            return user;
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        User user = null;
+        if(rs.next()){
+            user = new User(rs.getString("id"), rs.getString("name"), rs.getString("password"));
         }
+
+        rs.close();
+        ps.close();
+        conn.close();
+
+        if (user == null) throw new EmptyResultDataAccessException(1);
+
+        return user;
     }
 
 
 
     public void deleteAll() throws SQLException {
-        jdbcContextWithStatementStrategy(new StatementStrategy() {
-            @Override
-            public PreparedStatement makePreparedStrategy(Connection c) throws SQLException {
-                return c.prepareStatement("delete from users");
-            }
-        });
+        this.jdbcContext.executeSql("delete from users");
 
     }
 
-    public static void main(String[] args) {
-//        UserDao userDao = new UserDao(localDataSou);
-////        userDao.add();
-//        User user = userDao.findById("6");
-//        System.out.println(user.getName());
-    }
 
     public int getCount() throws SQLException, ClassNotFoundException {
         Connection c = null;
